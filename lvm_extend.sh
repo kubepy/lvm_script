@@ -23,6 +23,7 @@ EOF
     fdisk ${DEV} <<< "${FDISK_NEW_DISK}"
     partprobe ${DEV}
     sleep 3s
+
     # Add LVM
     pvcreate ${DEV}1 -y
     vgextend ${VG_NAME} ${DEV}1
