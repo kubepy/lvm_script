@@ -89,6 +89,7 @@ EOF
           then
               resize2fs ${lv_name}
           elif [ "$lvm_fstype" -eq "xfs" ]
+          then
               xfs_growfs ${lv_name}
           fi
           echo "############################################"
