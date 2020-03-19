@@ -103,6 +103,6 @@ EOF
        fi
    done <<< "${lv_extend_size_list}"
 else
-   echo "$new_disk_dev has been use. Exit!"
+   echo "$new_disk_dev has been used. Exit!"
    exit 1
 fi
