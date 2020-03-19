@@ -57,7 +57,7 @@ then
 n
 p
 1
-0
+
 
 w
 EOF
@@ -72,9 +72,12 @@ EOF
    do
        if [ "$lv_extend_size" -gt "0" ]
        then
-          echo "########################################"
+          echo "############################################"
           echo "Extend ${lv_extend_size}G for ${lv_name}"
           lvextend -L +${lv_extend_size}G ${lv_name}
+          resize2fs ${lv_name}
+          xfs_growfs ${lv_name}
+          echo "############################################"
        fi
    done <<< "${lv_extend_size_list}"
 else
