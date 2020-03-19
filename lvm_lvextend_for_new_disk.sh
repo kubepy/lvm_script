@@ -34,6 +34,7 @@ lv_home_extend_size=$((lv_home_size-lv_home_fixed_size))
 lv_tivoli_extend_size=$((lv_tivoli_size-lv_tivoli_fixed_size))
 lv_opt_extend_size=$((lv_opt_size-lv_opt_fixed_size))
 
+# Loop list for lvextend
 lv_extend_size_list="$(cat <<-EOF
 ${lv_root_extend_size} /dev/mapper/VolGroup-lv_root
 ${lv_swap_extend_size} /dev/mapper/VolGroup-lv_swap
@@ -47,7 +48,14 @@ ${lv_opt_extend_size} /dev/mapper/VolGroup-lv_opt
 EOF
 )"
 
+# Other Vars
 new_disk_dev="/dev/sdb"
+if [ "$(uname -r | sed 's/^.*\(el[0-9]\+\).*$/\1/' | sed 's/el//')" -gt "6" ]
+then
+    lvm_fstype="xfs"
+else
+    lvm_fstype="ext4"
+fi
 
 # Format For The New Disk
 ls ${new_disk_dev}[1-9]
@@ -59,12 +67,15 @@ p
 1
 
 
+t
+1
+8e
 w
 EOF
    )"
    fdisk ${new_disk_dev} <<< "${fdisk_command_for_new_disk_dev}"
    partprobe ${new_disk_dev}
-   sleep 3s
+   sleep 5s
    pvcreate ${new_disk_dev}1 -y
    vgextend VolGroup ${new_disk_dev}1
 
@@ -75,12 +86,16 @@ EOF
           echo "############################################"
           echo "Extend ${lv_extend_size}G for ${lv_name}"
           lvextend -L +${lv_extend_size}G ${lv_name}
-          resize2fs ${lv_name}
-          xfs_growfs ${lv_name}
+          if [ "$lvm_fstype" -eq "ext4" ]
+          then
+              resize2fs ${lv_name}
+          else [ "$lvm_fstype" -eq "xfs" ]
+              xfs_growfs ${lv_name}
+          fi
           echo "############################################"
        fi
    done <<< "${lv_extend_size_list}"
 else
-   echo "$new_disk_dev has been use, Exit!"
+   echo "$new_disk_dev has been use. Exit!"
    exit 1
 fi
