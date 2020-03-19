@@ -85,12 +85,19 @@ EOF
           echo "############################################"
           echo "Extend ${lv_extend_size}G for ${lv_name}"
           lvextend -L +${lv_extend_size}G ${lv_name}
-          if [ "$lvm_fstype" == "ext4" ]
+          if [ "$lv_name" == "/dev/mapper/VolGroup-lv_swap" ]
           then
-              resize2fs ${lv_name}
-          elif [ "$lvm_fstype" == "xfs" ]
-          then
-              xfs_growfs ${lv_name}
+              swapoff -v ${lv_name}
+              mkswap ${lv_name}
+              swapon -va
+          else
+              if [ "$lvm_fstype" == "ext4" ]
+              then
+                  resize2fs ${lv_name}
+              elif [ "$lvm_fstype" == "xfs" ]
+              then
+                  xfs_growfs ${lv_name}
+              fi
           fi
           echo "############################################"
        fi
