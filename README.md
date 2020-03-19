@@ -1,9 +1,5 @@
 # lvm_script
 
 ### 1. Extend to some path for a new disk
-#### bash lvm_extend.sh <extend_path> <vg_name> <dev_path>
-    bash lvm_extend.sh / rhel /dev/sdb
-
-### 2. Add lv_opt to /opt for a new disk
-#### bash lvm_add_opt.sh /opt <vg_name> <dev_path> <fs_type>
-    bash lvm_add_opt.sh /opt rhel /dev/sdb xfs
+#### bash lvm_extend.sh <lv_root_size> <lv_swap_size> <lv_usr_size> <lv_tmp_size> <lv_var_size> <lv_var_crash_size> <lv_home_size> <lv_tivoli_size> <lv_opt_size>
+    bash lvm_extend.sh 11 17 11 6 11 17 6 11 6
