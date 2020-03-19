@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 
 # Input Vars
 lv_root_size=$1
@@ -34,28 +34,29 @@ lv_home_extend_size=$((lv_home_size-lv_home_fixed_size))
 lv_tivoli_extend_size=$((lv_tivoli_size-lv_tivoli_fixed_size))
 lv_opt_extend_size=$((lv_opt_size-lv_opt_fixed_size))
 
-# Loop list for lvextend
-lv_extend_size_list="$(cat <<-EOF
-${lv_root_extend_size} /dev/mapper/VolGroup-lv_root
-${lv_swap_extend_size} /dev/mapper/VolGroup-lv_swap
-${lv_usr_extend_size} /dev/mapper/VolGroup-lv_usr
-${lv_tmp_extend_size} /dev/mapper/VolGroup-lv_tmp
-${lv_var_extend_size} /dev/mapper/VolGroup-lv_var
-${lv_var_crash_extend_size} /dev/mapper/VolGroup-lv_var_crash
-${lv_home_extend_size} /dev/mapper/VolGroup-lv_home
-${lv_tivoli_extend_size} /dev/mapper/VolGroup-lv_tivoli
-${lv_opt_extend_size} /dev/mapper/VolGroup-lv_opt
-EOF
-)"
-
 # Other Vars
 new_disk_dev="/dev/sdb"
+vg_name="VolGroup"
 if [ "$(uname -r | sed 's/^.*\(el[0-9]\+\).*$/\1/' | sed 's/el//')" -gt "6" ]
 then
     lvm_fstype="xfs"
 else
     lvm_fstype="ext4"
 fi
+
+# Loop list for lvextend
+lv_extend_size_list="$(cat <<-EOF
+${lv_root_extend_size} /dev/mapper/$vg_name-lv_root
+${lv_swap_extend_size} /dev/mapper/$vg_name-lv_swap
+${lv_usr_extend_size} /dev/mapper/$vg_name-lv_usr
+${lv_tmp_extend_size} /dev/mapper/$vg_name-lv_tmp
+${lv_var_extend_size} /dev/mapper/$vg_name-lv_var
+${lv_var_crash_extend_size} /dev/mapper/$vg_name-lv_var_crash
+${lv_home_extend_size} /dev/mapper/$vg_name-lv_home
+${lv_tivoli_extend_size} /dev/mapper/$vg_name-lv_tivoli
+${lv_opt_extend_size} /dev/mapper/$vg_name-lv_opt
+EOF
+)"
 
 # Format For The New Disk
 ls ${new_disk_dev}[1-9]
@@ -76,7 +77,7 @@ EOF
    partprobe ${new_disk_dev}
    sleep 5s
    pvcreate ${new_disk_dev}1 -y
-   vgextend VolGroup ${new_disk_dev}1
+   vgextend $vg_name ${new_disk_dev}1
 
    while read lv_extend_size lv_name
    do
@@ -85,7 +86,7 @@ EOF
           echo "############################################"
           echo "Extend ${lv_extend_size}G for ${lv_name}"
           lvextend -L +${lv_extend_size}G ${lv_name}
-          if [ "$lv_name" == "/dev/mapper/VolGroup-lv_swap" ]
+          if [ "$lv_name" == "/dev/mapper/$vg_name-lv_swap" ]
           then
               swapoff -v ${lv_name}
               mkswap ${lv_name}
