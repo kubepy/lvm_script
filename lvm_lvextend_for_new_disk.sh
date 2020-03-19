@@ -9,7 +9,7 @@ lv_var_size=$5
 lv_var_crash_size=$6
 lv_home_size=$7
 lv_tivoli_size=$8
-lv_opt=$9
+lv_opt_size=$9
 
 # Fixed Vars
 boot_fixed_size=1
@@ -22,28 +22,61 @@ lv_var_crash_fixed_size=16
 lv_home_fixed_size=5
 lv_tivoli_fixed_size=10
 lv_opt_fixed_size=5
-disk_sda_total_size=$((${boot_fixed_size}+${lv_root_fixed_size}+${lv_swap_fixed_size}+${lv_usr_fixed_size}+${lv_tmp_fixed_size}+${lv_var_fixed_size}+${lv_var_crash_fixed_size}+${lv_home_fixed_size}+${lv_tivoli_fixed_size}+$lv_opt_fixed_size}))
+
+# Extend Disk Vars
+lv_root_extend_size=$((lv_root_size-lv_root_fixed_size))
+lv_swap_extend_size=$((lv_swap_size-lv_swap_fixed_size))
+lv_usr_extend_size=$((lv_usr_size-lv_usr_fixed_size))
+lv_tmp_extend_size=$((lv_tmp_size-lv_tmp_fixed_size))
+lv_var_extend_size=$((lv_var_size-lv_var_fixed_size))
+lv_var_crash_extend_size=$((lv_var_crash_size-lv_var_crash_fixed_size))
+lv_home_extend_size=$((lv_home_size-lv_home_fixed_size))
+lv_tivoli_extend_size=$((lv_tivoli_size-lv_tivoli_fixed_size))
+lv_opt_extend_size=$((lv_opt_size-lv_opt_fixed_size))
+
+lv_extend_size_list="$(cat <<-EOF
+${lv_root_extend_size} lv_root
+${lv_swap_extend_size} lv_swap
+${lv_usr_extend_size} lv_usr
+${lv_tmp_extend_size} lv_tmp
+${lv_var_extend_size} lv_var
+${lv_var_crash_extend_size} lv_var_crash
+${lv_home_extend_size} lv_home
+${lv_tivoli_extend_size} lv_tivoli
+${lv_opt_extend_size} lv_opt
+EOF
+)"
+
 new_disk_dev="/dev/sdb"
 
 # Format For The New Disk
-fdisk_command_for_new_disk_dev="$(cat <<-EOF
+ls ${new_disk_dev}[1-9]
+if [ "$?" != "0" ]
+then
+    fdisk_command_for_new_disk_dev="$(cat <<-EOF
 n
 p
 1
 w
 EOF
-)"
-fdisk ${new_disk_dev} <<< "${fdisk_command_for_new_disk_dev}"
-partprobe ${new_disk_dev}
-sleep 3s
-pvcreate ${new_disk_dev}1 -y
-vgextend VolGroup ${new_disk_dev}1
-lvextend -l +${lv_root_size}G lv_root
-lvextend -l +${lv_swap_size}G lv_swap
-lvextend -l +${lv_usr_size}G lv_usr
-lvextend -l +${lv_tmp_size}G lv_tmp
-lvextend -l +${lv_var_size}G lv_var
-lvextend -l +${lv_var_crash_size}G lv_var_crash
-lvextend -l +${lv_home_size}G lv_home
-lvextend -l +${lv_tivoli_size}G lv_tivoli
-lvextend -l +${lv_opt_size}G lv_opt
+   )"
+   fdisk ${new_disk_dev} <<< "${fdisk_command_for_new_disk_dev}"
+   partprobe ${new_disk_dev}
+   sleep 3s
+   pvcreate ${new_disk_dev}1 -y
+   vgextend VolGroup ${new_disk_dev}1
+
+   while read lv_extend_size lv_name
+   do
+       if [ "$lv_extend_size" -gt "0" ]
+       then
+          echo "########################################"
+          echo "Extend ${lv_extend_size}G for ${lv_name}"
+          lvextend -l +${lv_extend_size}G ${lv_name}
+          echo "########################################"
+       fi
+   done <<< "${lv_extend_size_list}"
+else
+   echo "$new_disk_dev has been use, Exit!"
+   exit 1
+fi
