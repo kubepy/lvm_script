@@ -35,15 +35,15 @@ lv_tivoli_extend_size=$((lv_tivoli_size-lv_tivoli_fixed_size))
 lv_opt_extend_size=$((lv_opt_size-lv_opt_fixed_size))
 
 lv_extend_size_list="$(cat <<-EOF
-${lv_root_extend_size} lv_root
-${lv_swap_extend_size} lv_swap
-${lv_usr_extend_size} lv_usr
-${lv_tmp_extend_size} lv_tmp
-${lv_var_extend_size} lv_var
-${lv_var_crash_extend_size} lv_var_crash
-${lv_home_extend_size} lv_home
-${lv_tivoli_extend_size} lv_tivoli
-${lv_opt_extend_size} lv_opt
+${lv_root_extend_size} /dev/mapper/VolGroup-lv_root
+${lv_swap_extend_size} /dev/mapper/VolGroup-lv_swap
+${lv_usr_extend_size} /dev/mapper/VolGroup-lv_usr
+${lv_tmp_extend_size} /dev/mapper/VolGroup-lv_tmp
+${lv_var_extend_size} /dev/mapper/VolGroup-lv_var
+${lv_var_crash_extend_size} /dev/mapper/VolGroup-lv_var_crash
+${lv_home_extend_size} /dev/mapper/VolGroup-lv_home
+${lv_tivoli_extend_size} /dev/mapper/VolGroup-lv_tivoli
+${lv_opt_extend_size} /dev/mapper/VolGroup-lv_opt
 EOF
 )"
 
@@ -57,6 +57,8 @@ then
 n
 p
 1
+0
+
 w
 EOF
    )"
@@ -72,8 +74,7 @@ EOF
        then
           echo "########################################"
           echo "Extend ${lv_extend_size}G for ${lv_name}"
-          lvextend -l +${lv_extend_size}G ${lv_name}
-          echo "########################################"
+          lvextend -L +${lv_extend_size}G ${lv_name}
        fi
    done <<< "${lv_extend_size_list}"
 else
