@@ -89,7 +89,7 @@ EOF
           if [ "$lvm_fstype" -eq "ext4" ]
           then
               resize2fs ${lv_name}
-          else [ "$lvm_fstype" -eq "xfs" ]
+          if [ "$lvm_fstype" -eq "xfs" ]
               xfs_growfs ${lv_name}
           fi
           echo "############################################"
