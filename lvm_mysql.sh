@@ -67,7 +67,6 @@ EOF
                echo "${lv_path} ${mount_path} ${lvm_fstype} defaults 0 0" >> /etc/fstab
                mount -av
            fi
-
        fi
    done <<< "${lv_extend_size_list}"
 else
