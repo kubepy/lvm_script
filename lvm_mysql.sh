@@ -8,7 +8,7 @@ new_disk_dev="/dev/sdb"
 lv_mysql_fixed_size=15
 
 # Other Vars
-vg_name=Oraclevg
+vg_name=Mysqlvg
 if [ "$(uname -r | sed 's/^.*\(el[0-9]\+\).*$/\1/' | sed 's/el//')" -gt "6" ]
 then
     lvm_fstype="xfs"
