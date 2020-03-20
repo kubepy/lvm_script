@@ -5,7 +5,7 @@ lv_oradata_size=$1
 new_disk_dev="/dev/sdc"
 
 # Fixed Vars
-lv_oracle_fixed_size=15
+lv_oracle_fixed_size=5
 
 # Other Vars
 vg_name=Oraclevg
