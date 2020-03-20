@@ -5,7 +5,7 @@ lv_mydata_size=$1
 new_disk_dev="/dev/sdb"
 
 # Fixed Vars
-lv_mysql_fixed_size=15
+lv_mysql_fixed_size=5
 
 # Other Vars
 vg_name=Mysqlvg
